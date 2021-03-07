@@ -1,8 +1,10 @@
 const users = require('../controllers/users.controller');
 
 module.exports = function (app) {
-    app.route(app.rootUrl + '/users/register')
-        .post(users.registerUser);
+
+    app.post(app.rootUrl + '/users/register',
+        users.validateUserReq(),
+        users.registerUser);
 
     app.route(app.rootUrl + '/users/login')
         .post(users.loginUser);
