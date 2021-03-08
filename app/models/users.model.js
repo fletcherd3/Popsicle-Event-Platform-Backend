@@ -1,7 +1,11 @@
 const db = require('../../config/db');
+const bcrypt = require('bcrypt');
 
 exports.registerUser = async function(firstName, lastName, email, password) {
-    // TODO: Add password hashing
+    // Hash Password
+    const salt = await bcrypt.genSalt(10);
+    password = await bcrypt.hash(password, salt);
+
     const query = 'INSERT INTO user (first_name, last_name, email, password) VALUES (?, ?, ?, ?)';
     const [rows] = await db.getPool().query(query, [firstName, lastName, email, password]);
 
@@ -10,16 +14,16 @@ exports.registerUser = async function(firstName, lastName, email, password) {
 };
 
 exports.isLoginValid = async function(email, password) {
-    // TODO: Add password hashing
     const query = 'SELECT password FROM user where email = ?';
     const [rows] = await db.getPool().query(query, [email]);
 
     if (rows.length > 0) {
-        const storedPassword = rows[0].password;
-        return (password === storedPassword);
-    } else {
-        return false;
+        const storedHash = rows[0].password;
+        const validMatch = await bcrypt.compare(password, storedHash);
+        return validMatch;
     }
+    // No User found with matching email
+    return false;
 };
 
 exports.setUserToken = async function(userToken, email) {
