@@ -38,3 +38,14 @@ exports.isEmailInDb = async function(email) {
     const [rows] = await db.getPool().query(query, [email]);
     return rows.length > 0;
 };
+
+exports.isTokenInDb = async function(userToken) {
+    const query = 'SELECT id FROM user WHERE auth_token = ? ';
+    const [rows] = await db.getPool().query(query, [userToken]);
+    return rows.length > 0;
+};
+
+exports.deleteToken = async function(userToken) {
+    const query = 'UPDATE user SET auth_token = null WHERE auth_token = ? ';
+    await db.getPool().query(query, [userToken]);
+};

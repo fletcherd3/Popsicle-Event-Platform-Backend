@@ -37,7 +37,6 @@ exports.registerUser = async function(req, res){
         // Register the valid user
         const registeredUsersId = await users.registerUser(firstName, lastName, email, password);
         res.status(201).send({"userId": registeredUsersId});
-
     } catch (err) {
         res.status(500).send('Internal Server Error');
     }
@@ -62,5 +61,21 @@ exports.loginUser = async function(req, res){
         res.status(200).send({"userId": userId, "token": userToken})
     } catch (err) {
         res.status(500).send( 'Internal Server Error');
+    }
+};
+
+exports.logoutUser = async function (req, res) {
+    try{
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const isValidToken = await users.isTokenInDb(userToken);
+        if(!isValidToken){
+            res.status(401).send('Unauthorized')
+        }
+
+        await users.deleteToken(userToken);
+        res.status(200).send('OK')
+    } catch (err){
+        res.status(500).send(`ERROR getting users ${err}`);
     }
 };
