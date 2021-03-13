@@ -2,9 +2,9 @@ const users = require('../controllers/users.controller');
 
 module.exports = function (app) {
 
-    app.post(app.rootUrl + '/users/register',
-        users.validateUserReq(),
-        users.registerUser);
+    app.route(app.rootUrl + '/users/register')
+        .post(users.validateUserReq('register'))
+        .post(users.registerUser);
 
     app.route(app.rootUrl + '/users/login')
         .post(users.loginUser);
@@ -13,8 +13,8 @@ module.exports = function (app) {
         .post(users.logoutUser);
 
     app.route(app.rootUrl + '/users/:id')
-        .get(users.getUser);
-    //
-    // app.route(app.rootUrl + '/users/:id')
-    //     .patch(users.updateUser);
+        .get(users.getUser)
+        .patch(users.validateUserReq('update'))
+        .patch(users.updateUser);
+
 };
