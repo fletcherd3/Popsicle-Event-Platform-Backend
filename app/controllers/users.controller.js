@@ -1,15 +1,33 @@
 const users = require('../models/users.model');
-const crypto = require('crypto')
-const {body, validationResult} = require('express-validator')
+const crypto = require('crypto');
+const {body, validationResult} = require('express-validator');
 
-exports.validateUserReq = function () {
-    return [
-        body('firstName').isLength({ min: 1 }),
-        body('lastName').isLength({ min: 1 }),
-        body('email').isEmail(),
-        body('password').isLength({ min: 1 })
-    ]
-}
+exports.validateUserReq = (reqType) => {
+    switch (reqType) {
+        case 'register': {
+            return [
+                body('email').isEmail(),
+                body([
+                    'firstName',
+                    'lastName',
+                    'password'
+                ]).isLength({ min: 1 })
+            ]
+        }
+        case 'update': {
+            return [
+                body('email').optional().isEmail(),
+                body([
+                    'firstName',
+                    'lastName',
+                    'currentPassword',
+                    'password'
+                ]).optional().isLength({ min: 1 })
+            ]
+        }
+    }
+
+};
 
 exports.registerUser = async function(req, res){
     try {
@@ -71,7 +89,7 @@ exports.logoutUser = async function (req, res) {
         const isValidToken = await users.isTokenInDb(userToken);
 
         if(!isValidToken){
-            res.status(401).send('Unauthorized')
+            res.status(401).send('Unauthorized');
             return;
         }
 
@@ -124,6 +142,72 @@ exports.getUser = async function (req, res) {
         }
 
         res.status(200).send(usersData);
+    } catch (err){
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+exports.updateUser = async function (req, res) {
+    try{
+        // Validate request using validateUserReq
+        const requestErrors = await validationResult(req);
+        if (!requestErrors.isEmpty()) {
+            console.log(requestErrors);
+            res.status(400).send('Bad Request');
+            return;
+        }
+
+
+
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const isValidToken = await users.isTokenInDb(userToken);
+        if(!isValidToken){
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the user is in the Database, if not send 400
+        const userIdToEdit = req.params.id;
+        const userInDB = await users.isUserInDb(userIdToEdit);
+        if (!userInDB){
+            res.status(400).send("Bad Request");
+            return;
+        }
+
+        // Check if the requesting User is editing their own details, if not send 403
+        const requestingId = await users.getUserIdByToken(userToken);
+        const isMatchingUser = requestingId == userIdToEdit;
+        if (!isMatchingUser) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        const firstName = req.body.firstName;
+        const lastName = req.body.lastName;
+        const email = req.body.email;
+        const newPassword = req.body.password;
+        const currentPassword = req.body.currentPassword;
+
+        // Make sure that if one password field is passed then the other is also passed
+        if ((newPassword != undefined && currentPassword == undefined) ||
+            (newPassword == undefined && currentPassword != undefined)) {
+            res.status(400).send('Bad Request');
+            return;
+        }
+
+        // If the user is changing their password
+        if (newPassword != undefined) {
+            // Make sure that the current password supplied matched the password stored in the database
+            const currentPasswordValid = await users.isCurrentPasswordValid(requestingId, currentPassword);
+            if (!currentPasswordValid) {
+                res.status(403).send('Forbidden');
+                return;
+            }
+        }
+
+        await users.updateUser(requestingId, firstName, lastName, email, newPassword);
+        res.status(200).send('OK')
     } catch (err){
         res.status(500).send('Internal Server Error');
     }

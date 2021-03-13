@@ -1,10 +1,10 @@
 const db = require('../../config/db');
+const passwords = require('./passwords');
 const bcrypt = require('bcrypt');
 
 exports.registerUser = async function(firstName, lastName, email, password) {
     // Hash Password
-    const salt = await bcrypt.genSalt(10);
-    password = await bcrypt.hash(password, salt);
+    password = await passwords.hash(password);
 
     const query = 'INSERT INTO user (first_name, last_name, email, password) VALUES (?, ?, ?, ?)';
     const [rows] = await db.getPool().query(query, [firstName, lastName, email, password]);
@@ -77,3 +77,47 @@ exports.isUserInDb = async function(userId) {
     const [rows] = await db.getPool().query(query, [userId]);
     return rows.length > 0;
 };
+
+exports.isCurrentPasswordValid = async function(userId, currentPassword) {
+    const query = 'SELECT password FROM user WHERE id = ?';
+    const [rows] = await db.getPool().query(query, [userId]);
+
+    if (rows.length > 0) {
+        const storedHash = rows[0].password;
+        const validMatch = await bcrypt.compare(currentPassword, storedHash);
+        return validMatch;
+    }
+    // No User found with matching id
+    return false;
+};
+
+exports.updateUser = async function(id, firstName, lastName, email, newPassword) {
+    let queryValues = []
+    let query = 'UPDATE user SET ';
+
+    if (firstName != undefined) {
+        query += "first_name = ?, ";
+        queryValues.push(firstName);
+    }
+    if (lastName != undefined) {
+        query += "last_name = ?, ";
+        queryValues.push(lastName);
+    }
+    if (email != undefined) {
+        query += "email = ?, ";
+        queryValues.push(email);
+    }
+    if (newPassword != undefined) {
+        newPassword = await passwords.hash(newPassword);
+        query += "password = ?, ";
+        queryValues.push(newPassword);
+    }
+    // Get rid of the last comma
+    const lastComma = query.lastIndexOf(',');
+    query = query.slice(0, lastComma) + query.slice(lastComma+1);
+    query += " WHERE id = ?";
+    queryValues.push(id);
+
+    await db.getPool().query(query, queryValues);
+};
+
