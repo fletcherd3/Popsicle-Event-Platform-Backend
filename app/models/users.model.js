@@ -31,9 +31,15 @@ exports.setUserToken = async function(userToken, email) {
     await db.getPool().query(query, [userToken, email]);
 };
 
-exports.getUserId = async function(email) {
+exports.getUserIdByEmail = async function(email) {
     const query = 'SELECT id FROM user WHERE email = ? ';
     const [rows] = await db.getPool().query(query, [email]);
+    return rows[0].id;
+};
+
+exports.getUserIdByToken = async function(userToken){
+    const query = 'SELECT id FROM user WHERE auth_token = ? ';
+    const [rows] = await db.getPool().query(query, [userToken]);
     return rows[0].id;
 };
 
@@ -52,4 +58,22 @@ exports.isTokenInDb = async function(userToken) {
 exports.deleteToken = async function(userToken) {
     const query = 'UPDATE user SET auth_token = null WHERE auth_token = ? ';
     await db.getPool().query(query, [userToken]);
+};
+
+exports.getAuthUser = async function(userId) {
+    const query = 'SELECT first_name, last_name, email FROM user WHERE id = ? ';
+    const [rows] = await db.getPool().query(query, [userId]);
+    return rows[0];
+};
+
+exports.getNonAuthUser = async function(userId) {
+    const query = 'SELECT first_name, last_name FROM user WHERE id = ? ';
+    const [rows] = await db.getPool().query(query, [userId]);
+    return rows[0];
+};
+
+exports.isUserInDb = async function(userId) {
+    const query = 'SELECT id FROM user WHERE id = ? ';
+    const [rows] = await db.getPool().query(query, [userId]);
+    return rows.length > 0;
 };
