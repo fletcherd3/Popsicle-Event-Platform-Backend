@@ -42,7 +42,6 @@ exports.getEvents = async function(req, res){
             }
         }
 
-        // TODO: Add sort by attendance
         // Order by title
         let sortQuery;
         if(sortBy === 'ALPHABETICAL_ASC'){
@@ -54,6 +53,11 @@ exports.getEvents = async function(req, res){
             sortQuery = 'ORDER BY capacity ASC'
         } else if (sortBy === 'CAPACITY_DESC') {
             sortQuery = 'ORDER BY capacity DESC'
+        // Order by approved attendees
+        } else if (sortBy === 'ATTENDEES_ASC'){
+            sortQuery = 'ORDER BY numAcceptedAttendees ASC'
+        } else if (sortBy === 'ATTENDEES_DESC') {
+            sortQuery = 'ORDER BY numAcceptedAttendees DESC'
         // Order by date
         } else if (sortBy === 'DATE_ASC'){
             sortQuery = 'ORDER BY date ASC'
