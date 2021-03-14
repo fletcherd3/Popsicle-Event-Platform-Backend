@@ -92,7 +92,7 @@ exports.isCurrentPasswordValid = async function(userId, currentPassword) {
 };
 
 exports.updateUser = async function(id, firstName, lastName, email, newPassword) {
-    let queryValues = []
+    let queryValues = [];
     let query = 'UPDATE user SET ';
 
     if (firstName != undefined) {
