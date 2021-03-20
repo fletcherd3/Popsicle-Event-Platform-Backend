@@ -8,7 +8,8 @@ exports.getEvents = async function(req, res){
         let startIndex = req.query.startIndex;
         const count = req.query.count;
         const queryTerm = req.query.q;
-        const categoryIds = req.query.categoryIds;
+        let categoryIds = req.query.categoryIds;
+        categoryIds = categoryIds == undefined || Array.isArray(categoryIds) ? categoryIds : [categoryIds];
         const organizerId = req.query.organizerId;
         const sortBy = req.query.sortBy;
 
@@ -22,17 +23,20 @@ exports.getEvents = async function(req, res){
             return;
         }
 
-        // TODO: accept a list of Category Ids
-        // Check if the Category Id is in the DB
-        // if(categoryIds != undefined){
-        //     // console.log(categoryIds);
-        //     // const categorysInDb = await categoryIds.filter(category => events.isCatergoryInDb(category));
-        //     const categoryInDb = await events.isCatergoryInDb(categoryIds);
-        //     if(!categoryInDb) {
-        //         res.status(400).send('Bad Request');
-        //         return;
-        //     }
-        // }
+        // Check if the Category Ids are in the DB
+        if(categoryIds != undefined){
+            let categoriesInDb = [];
+            for (let i = 0; i < categoryIds.length; i++) {
+                if (await events.isCatergoryInDb(categoryIds[i])) {
+                    categoriesInDb.push(categoryIds[i]);
+                }
+            }
+            categoryIds = categoriesInDb;
+            if(categoriesInDb.length === 0) {
+                res.status(400).send('Bad Request');
+                return;
+            }
+        }
 
         // Check that the organizer Id is a positive number
         if(organizerId != undefined) {
@@ -85,5 +89,6 @@ exports.getEvents = async function(req, res){
         res.status(200).send(eventResults);
     } catch (err) {
         res.status(500).send('Internal Server Error');
+        console.log(err);
     }
 };

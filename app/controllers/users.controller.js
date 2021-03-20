@@ -157,8 +157,6 @@ exports.updateUser = async function (req, res) {
             return;
         }
 
-
-
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
         const isValidToken = await users.isTokenInDb(userToken);
