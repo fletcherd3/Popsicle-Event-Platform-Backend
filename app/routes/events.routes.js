@@ -4,9 +4,10 @@ module.exports = function (app) {
     app.route(app.rootUrl + '/events')
         .get(events.getEvents);
 
-    // app.route(app.rootUrl + '/events')
-    //     .post(events.addEvent);
-    //
+    app.route(app.rootUrl + '/events')
+        .post(events.validateEventReq())
+        .post(events.addEvent);
+
     // app.route(app.rootUrl + '/events/:id')
     //     .get(events.getEvent);
     //

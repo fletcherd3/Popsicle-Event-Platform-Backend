@@ -114,8 +114,8 @@ exports.getUser = async function (req, res) {
 
         // Get users token from header and check if exists & active
         const userToken = req.header('x-authorization');
-        const reqHasToken = !(userToken === undefined);
-        const isValidToken = (await users.isTokenInDb(userToken) && reqHasToken);
+        const reqHasToken = !(userToken === "null");
+        const isValidToken = (reqHasToken && await users.isTokenInDb(userToken));
 
         // Check whether requesting user is viewing their own details
         if (isValidToken) {

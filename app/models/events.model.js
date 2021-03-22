@@ -48,3 +48,23 @@ exports.getEvents = async function(queryTerm, categoryIds, organizerId, sortQuer
 
     return events;
 };
+
+exports.addEvent = async function(
+    title, description, categoryIds, date, isOnline, url, venue,capacity, requiresAttendanceControl, fee, userId) {
+    const query = 'INSERT INTO event ' +
+        '(title, description, date, is_online, url, venue, capacity, requires_attendance_control, fee, organizer_id) ' +
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const [rows] = await db.getPool().query(query, [title, description, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee, userId]);
+
+    // Return the ID of registered User
+    return rows.insertId;
+};
+
+exports.isEventInDB = async function(title, date, userId) {
+    // Remove milliseconds
+    date = date.replace(/\.\d+/, "");
+    const query = 'SELECT * FROM event WHERE title = ? AND date = ? AND organizer_id = ?';
+    const [rows] = await db.getPool().query(query, [title, date, userId]);
+
+    return rows.length > 0;
+};

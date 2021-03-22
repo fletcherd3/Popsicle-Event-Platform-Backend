@@ -52,7 +52,8 @@ exports.isEmailInDb = async function(email) {
 exports.isTokenInDb = async function(userToken) {
     const query = 'SELECT id FROM user WHERE auth_token = ? ';
     const [rows] = await db.getPool().query(query, [userToken]);
-    return rows.length > 0;
+
+    return rows[0].id; // Still works in boolean conditions
 };
 
 exports.deleteToken = async function(userToken) {
