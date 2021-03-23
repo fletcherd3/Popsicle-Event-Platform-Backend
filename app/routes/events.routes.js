@@ -8,9 +8,9 @@ module.exports = function (app) {
         .post(events.validateEventReq())
         .post(events.addEvent);
 
-    // app.route(app.rootUrl + '/events/:id')
-    //     .get(events.getEvent);
-    //
+    app.route(app.rootUrl + '/events/:id')
+        .get(events.getEvent);
+
     // app.route(app.rootUrl + '/events/:id')
     //     .patch(events.updateEvent);
     //

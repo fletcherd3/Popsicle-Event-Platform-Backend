@@ -172,6 +172,24 @@ exports.addEvent = async function(req, res){
     }
 };
 
+exports.getEvent = async function(req, res){
+    try {
+        const requestedId = req.params.id;
+
+        // Check whether the event is in the Database, if not send 404
+        const event = await events.getEvent(requestedId);
+        if (!event){
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        res.status(200).send(event);
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
+
 // exports.addEvent = async function(req, res){
 //     try {
 //
