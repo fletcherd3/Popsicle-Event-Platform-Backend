@@ -40,7 +40,8 @@ exports.getUserIdByEmail = async function(email) {
 exports.getUserIdByToken = async function(userToken){
     const query = 'SELECT id FROM user WHERE auth_token = ? ';
     const [rows] = await db.getPool().query(query, [userToken]);
-    return rows[0].id;
+
+    return rows[0] === undefined ? rows[0] : rows[0].id;
 };
 
 exports.isEmailInDb = async function(email) {
@@ -53,7 +54,7 @@ exports.isTokenInDb = async function(userToken) {
     const query = 'SELECT id FROM user WHERE auth_token = ? ';
     const [rows] = await db.getPool().query(query, [userToken]);
 
-    return rows[0].id; // Still works in boolean conditions
+    return rows.length > 0;
 };
 
 exports.deleteToken = async function(userToken) {

@@ -5,15 +5,16 @@ module.exports = function (app) {
         .get(events.getEvents);
 
     app.route(app.rootUrl + '/events')
-        .post(events.validateEventReq())
+        .post(events.validateEventReq('create'))
         .post(events.addEvent);
 
     app.route(app.rootUrl + '/events/:id')
         .get(events.getEvent);
 
-    // app.route(app.rootUrl + '/events/:id')
-    //     .patch(events.updateEvent);
-    //
+    app.route(app.rootUrl + '/events/:id')
+        .patch(events.validateEventReq('update'))
+        .patch(events.updateEvent);
+
     // app.route(app.rootUrl + '/events/:id')
     //     .delete(events.deleteEvent);
     //

@@ -4,21 +4,42 @@ const {body, validationResult, check} = require('express-validator');
 
 
 exports.validateEventReq = (reqType) => {
-    return [
-        check('date').custom(value => {
-            let enteredDate = new Date(value);
-            let todaysDate = new Date();
-            if (enteredDate < todaysDate) {
-                throw new Error("Invalid Date");
-            }
-            return true;
-        }),
-        body([
-            'title',
-            'description',
-            'categoryIds'
-        ]).exists().isLength({ min: 1 })
-    ]
+    switch (reqType) {
+        case 'create': {
+            return [
+                check('date').custom(value => {
+                    let enteredDate = new Date(value);
+                    let todaysDate = new Date();
+                    if (enteredDate < todaysDate) {
+                        throw new Error("Invalid Date");
+                    }
+                    return true;
+                }),
+                body([
+                    'title',
+                    'description',
+                    'categoryIds'
+                ]).exists().isLength({min: 1})
+            ]
+        }
+        case 'update': {
+            return [
+                check('date').optional().custom(value => {
+                    let enteredDate = new Date(value);
+                    let todaysDate = new Date();
+                    if (enteredDate < todaysDate) {
+                        throw new Error("Invalid Date");
+                    }
+                    return true;
+                }),
+                body([
+                    'title',
+                    'description',
+                    'categoryIds'
+                ]).optional().exists().isLength({min: 1})
+            ]
+        }
+    }
 };
 
 exports.getEvents = async function(req, res){
@@ -115,7 +136,7 @@ exports.addEvent = async function(req, res){
     try {
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
-        const userId = await users.isTokenInDb(userToken);
+        const userId = await users.getUserIdByToken(userToken);
         if(!userId){
             res.status(401).send('Unauthorized');
             return;
@@ -184,6 +205,73 @@ exports.getEvent = async function(req, res){
         }
 
         res.status(200).send(event);
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
+
+exports.updateEvent = async function(req, res){
+    try {
+        // Validate request using validateEventReq
+        const requestErrors = await validationResult(req);
+        if (!requestErrors.isEmpty()) {
+            console.log(requestErrors);
+            res.status(400).send('Bad Request');
+            return;
+        }
+
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const isValidToken = await users.isTokenInDb(userToken);
+        if(!isValidToken){
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the event is in the Database, if not send 404
+        const eventIdToEdit = req.params.id;
+        const eventInDB = await events.isEventIDInDB(eventIdToEdit);
+        if (!eventInDB){
+            res.status(404).send("Not Found");
+        }
+
+        // Check if the requesting User is editing their own event, if not send 403
+        const requestingId = await users.getUserIdByToken(userToken);
+        const organiserId = await events.getOrganiserId(eventIdToEdit);
+        const isEventsOrganiser = requestingId == organiserId;
+        if (!isEventsOrganiser) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        let event = {
+            title: req.body.title,
+            description: req.body.description,
+            date: req.body.date,
+            isOnline: req.body.isOnline,
+            url: req.body.url,
+            venue: req.body.venue,
+            capacity: req.body.capacity,
+            requiresAttendanceControl: req.body.requiresAttendanceControl,
+            fee: req.body.fee,
+            categoryIds: req.body.categoryIds
+        };
+
+        event.isOnline = event.isOnline === true ? 1 : 0;
+        event.requiresAttendanceControl = event.requiresAttendanceControl === true ? 1 : 0;
+
+        // Check if the Category Ids are in the DB
+        let categoriesInDb = [];
+        for (let i = 0; i < event.categoryIds.length; i++) {
+            if (await events.isCatergoryInDb(event.categoryIds[i])) {
+                categoriesInDb.push(event.categoryIds[i]);
+            }
+        }
+        event.categoryIds = categoriesInDb;
+
+        await events.updateEvent(eventIdToEdit, event);
+        res.status(200).send("OK");
     } catch (err) {
         res.status(500).send('Internal Server Error');
         console.log(err);
