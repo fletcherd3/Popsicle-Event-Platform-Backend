@@ -165,11 +165,11 @@ exports.updateUser = async function (req, res) {
             return;
         }
 
-        // Check whether the user is in the Database, if not send 400
+        // Check whether the user is in the Database, if not send 404
         const userIdToEdit = req.params.id;
         const userInDB = await users.isUserInDb(userIdToEdit);
         if (!userInDB){
-            res.status(400).send("Bad Request");
+            res.status(404).send("Not Found");
             return;
         }
 
