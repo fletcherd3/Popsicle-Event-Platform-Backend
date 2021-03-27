@@ -23,7 +23,7 @@ module.exports = function () {
     require('../app/routes/events.images.routes')(app);
     // require('../app/routes/events.attendees.routes')(app);
     require('../app/routes/users.routes')(app);
-    // require('../app/routes/users.images.routes')(app);
+    require('../app/routes/users.images.routes')(app);
 
     return app;
 };

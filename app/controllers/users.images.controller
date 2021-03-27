@@ -1,0 +1,75 @@
+const users = require('../models/users.model');
+const events = require('../models/events.model');
+const eventImage = require('../models/events.images.model');
+const userImage = require('../models/users.images.model');
+
+exports.setUserImage = async function (req, res) {
+    try {
+        const requestingUserId = req.params.id;
+
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const isValidToken = await users.isTokenInDb(userToken);
+        if (!isValidToken) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the user is in the Database, if not send 404
+        const userIdInDB = await users.getUserIdByToken(userToken)
+        if (!userIdInDB) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        // Check if the requesting User is adding an image to their own event, if not send 403
+        const isMatchingUser = requestingUserId == userIdInDB;
+        if (!isMatchingUser) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        const mimeType = req.header('Content-Type');
+        const HTTPStatus = await userImage.saveImage(req.body, mimeType, userIdInDB);
+        switch (HTTPStatus) {
+            case 200:
+                res.status(200).send("OK");
+                return;
+            case 201:
+                res.status(200).send("Created");
+                return;
+            case 400:
+                res.status(400).send("Bad Request");
+                return;
+            default:
+                res.status(500).send("Internal Server Error");
+                return;
+        }
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+// exports.getEventImage = async function (req, res) {
+//     try {
+//         const eventId = req.params.id;
+//
+//         // Check whether the event is in the Database, if not send 404
+//         const event = await events.getEvent(eventId);
+//         if (!event) {
+//             res.status(404).send("Not Found");
+//             return;
+//         }
+//
+//         const [image, mimeType] = await eventImage.getImage(eventId);
+//         if (!image) {
+//             res.status(404).send("Not Found");
+//             return;
+//         }
+//         res.contentType(mimeType);
+//         res.status(200).send(image);
+//
+//     } catch (err) {
+//         res.status(500).send('Internal Server Error');
+//     }
+// };
