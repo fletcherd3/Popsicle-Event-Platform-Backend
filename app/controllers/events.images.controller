@@ -36,7 +36,7 @@ exports.setEventImage = async function (req, res) {
                 res.status(200).send("OK");
                 return;
             case 201:
-                res.status(200).send("Created");
+                res.status(201).send("Created");
                 return;
             case 400:
                 res.status(400).send("Bad Request");
