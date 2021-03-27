@@ -15,9 +15,9 @@ module.exports = function (app) {
         .patch(events.validateEventReq('update'))
         .patch(events.updateEvent);
 
-    // app.route(app.rootUrl + '/events/:id')
-    //     .delete(events.deleteEvent);
-    //
+    app.route(app.rootUrl + '/events/:id')
+        .delete(events.deleteEvent);
+
     // app.route(app.rootUrl + '/events/categories')
     //     .get(events.getCategories);
 };

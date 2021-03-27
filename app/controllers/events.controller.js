@@ -278,6 +278,42 @@ exports.updateEvent = async function(req, res){
     }
 };
 
+exports.deleteEvent = async function(req, res){
+    try {
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const isValidToken = await users.isTokenInDb(userToken);
+        if(!isValidToken){
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the event is in the Database, if not send 404
+        const eventId = req.params.id;
+        const eventInDB = await events.isEventIDInDB(eventId);
+        if (!eventInDB){
+            res.status(404).send("Not Found");
+        }
+
+        // Check if the requesting User is deleting their own event, if not send 403
+        const requestingId = await users.getUserIdByToken(userToken);
+        const organiserId = await events.getOrganiserId(eventId);
+        const isEventsOrganiser = requestingId == organiserId;
+        if (!isEventsOrganiser) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        // Delete the event and its categories
+        await events.deleteEventsCatergories(eventId);
+        await events.deleteEvent(eventId);
+        res.status(200).send("OK");
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
+
 // exports.addEvent = async function(req, res){
 //     try {
 //

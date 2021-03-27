@@ -188,3 +188,14 @@ exports.updateEvent = async function(eventId, event) {
 
     await db.getPool().query(query, queryValues);
 };
+
+exports.deleteEventsCatergories = async function(eventId) {
+    const query =  `DELETE FROM event_category WHERE event_id = ?`;
+    await db.getPool().query(query, [eventId]);
+};
+
+exports.deleteEvent = async function(eventId) {
+    const query =  `DELETE FROM event WHERE id = ?`;
+    await db.getPool().query(query, [eventId]);
+};
+

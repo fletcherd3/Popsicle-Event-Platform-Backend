@@ -122,4 +122,3 @@ exports.updateUser = async function(id, firstName, lastName, email, newPassword)
 
     await db.getPool().query(query, queryValues);
 };
-
