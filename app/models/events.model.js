@@ -6,27 +6,44 @@ exports.isCatergoryInDb = async function(categoryId) {
     return rows.length > 0;
 };
 
+getEventsCategories = async function(eventId) {
+    // Get the categories for each event and format them into an array
+    query = 'SELECT category_id FROM event_category WHERE event_id = ?';
+
+    let categoriesResult = await db.getPool().query(query, [eventId]);
+    categoriesResult = categoriesResult[0];
+    let eventsCategories = [];
+    for (let j = 0; j < categoriesResult.length; j++) {
+        eventsCategories.push(categoriesResult[j].category_id);
+    }
+
+    return eventsCategories;
+};
+
+getEventsAttendees = async function(eventId) {
+    query = 'SELECT count(*) AS numAcceptedAttendees FROM event_attendees WHERE event_id = ? AND attendance_status_id = 1;';
+    const [result] = await db.getPool().query(query, [eventId]);
+    return result[0].numAcceptedAttendees;
+};
+
 exports.getEvents = async function(queryTerm, categoryIds, organizerId, sortQuery) {
-    // TODO fix the query so it counts events that dont have attendees
     let queryValues = [];
-    let query = `SELECT E.id AS eventId, E.title, U.first_name AS organizerFirstName, U.last_name AS organizerLastName, E.capacity, count(DISTINCT A.user_id) AS numAcceptedAttendees
+    let query = `SELECT E.id AS eventId, E.title, U.first_name AS organizerFirstName, U.last_name AS organizerLastName, E.capacity
                 FROM event E   
                 JOIN user U ON E.organizer_id = U.id
-                JOIN event_attendees A ON A.event_id = E.id
-                JOIN event_category C ON E.id = C.event_id
-                WHERE attendance_status_id = 1`;
+                JOIN event_category C ON E.id = C.event_id`;
 
-    if(queryTerm != undefined){
+    if(queryTerm !== undefined){
         query += ` AND (E.title LIKE ? OR E.description LIKE ?)`;
         queryValues.push("%" + queryTerm + "%", "%" + queryTerm + "%");
     }
 
-    if(categoryIds != undefined){
+    if(categoryIds !== undefined){
         query += ' AND C.category_id IN (?)';
         queryValues.push(categoryIds);
     }
 
-    if(organizerId != undefined){
+    if(organizerId !== undefined){
         query+= ' AND E.organizer_id = ?';
         queryValues.push(organizerId);
     }
@@ -35,16 +52,11 @@ exports.getEvents = async function(queryTerm, categoryIds, organizerId, sortQuer
     query += sortQuery;
     const [events] = await db.getPool().query(query, queryValues);
 
-    // Get the categories for each event and format them into an array
-    query = 'SELECT category_id FROM event_category WHERE event_id = ?';
+
     for (let i = 0; i < events.length; i++) {
-        let categoriesResult = await db.getPool().query(query, [events[i].eventId]);
-        categoriesResult = categoriesResult[0];
-        let eventsCategories = [];
-        for (let j = 0; j < categoriesResult.length; j++) {
-            eventsCategories.push(categoriesResult[j].category_id);
-        }
-        events[i].categories = eventsCategories;
+        const event = events[i];
+        event.categories = await getEventsCategories(event.eventId);
+        event.numAcceptedAttendees = await getEventsAttendees(event.eventId);
     }
 
     return events;
@@ -199,3 +211,14 @@ exports.deleteEvent = async function(eventId) {
     await db.getPool().query(query, [eventId]);
 };
 
+exports.getCategories = async function() {
+    const query = 'SELECT id AS categoryId, name FROM category ORDER BY categoryId';
+    const [categories] = await db.getPool().query(query, []);
+    return categories;
+};
+
+exports.getCategories = async function() {
+    const query = 'SELECT id AS categoryId, name FROM category ORDER BY categoryId';
+    const [categories] = await db.getPool().query(query, []);
+    return categories;
+};

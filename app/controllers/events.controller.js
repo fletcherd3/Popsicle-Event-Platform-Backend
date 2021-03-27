@@ -44,6 +44,7 @@ exports.validateEventReq = (reqType) => {
 
 exports.getEvents = async function(req, res){
     try {
+        // Get the query values
         let startIndex = req.query.startIndex;
         const count = req.query.count;
         const queryTerm = req.query.q;
@@ -63,7 +64,7 @@ exports.getEvents = async function(req, res){
         }
 
         // Check if the Category Ids are in the DB
-        if(categoryIds != undefined){
+        if(categoryIds !== undefined){
             let categoriesInDb = [];
             for (let i = 0; i < categoryIds.length; i++) {
                 if (await events.isCatergoryInDb(categoryIds[i])) {
@@ -78,7 +79,7 @@ exports.getEvents = async function(req, res){
         }
 
         // Check that the organizer Id is a positive number
-        if(organizerId != undefined) {
+        if(organizerId !== undefined) {
             if(organizerId < 0 || isNaN(organizerId)){
                 res.status(400).send('Bad Request');
                 return;
@@ -116,7 +117,7 @@ exports.getEvents = async function(req, res){
         eventResults = eventResults.splice(startIndex);
 
         // If a count is passed then only return at the most 'count' events
-        if (count != undefined){
+        if (count !== undefined){
             if(count < 0 || isNaN(count)){
                 res.status(400).send('Bad Request');
                 return;
@@ -234,6 +235,7 @@ exports.updateEvent = async function(req, res){
         const eventInDB = await events.isEventIDInDB(eventIdToEdit);
         if (!eventInDB){
             res.status(404).send("Not Found");
+            return;
         }
 
         // Check if the requesting User is editing their own event, if not send 403
@@ -314,12 +316,12 @@ exports.deleteEvent = async function(req, res){
     }
 };
 
-// exports.addEvent = async function(req, res){
-//     try {
-//
-//         res.status(200).send(thing);
-//     } catch (err) {
-//         res.status(500).send('Internal Server Error');
-//         console.log(err);
-//     }
-// };
+exports.getCategories = async function(req, res){
+    try {
+        const categories = await events.getCategories();
+        res.status(200).send(categories);
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
