@@ -12,7 +12,7 @@ const imageLocation = './storage/images/';
 exports.saveImage = async function (image, mimeType, userId) {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
-    if (!mimeType || !allowedMimeTypes.includes(mimeType)){
+    if (!mimeType || !allowedMimeTypes.includes(mimeType)) {
         return 400;
     }
     const fileType = mimeType.split('/')[1];

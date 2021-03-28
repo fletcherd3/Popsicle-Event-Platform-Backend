@@ -82,7 +82,7 @@ paths:
             * ATTENDEES_ASC: the number of signed up (approved) attendees, from least to most
 
             * ATTENDEES_DESC: the number of signed up (approved) attendees, from most to least
-            
+
             * CAPACITY_ASC: the capacity from least to most
 
             * CAPACITY_DESC: the capacity from most to least
@@ -110,11 +110,11 @@ paths:
       summary: Add a new event.
       description: >-
         The elements of the category ids array `categoryIds` must each reference an existing category.
-        
-        
+
+
         `title`, `description`, and `categoryIds` are required, other properties are optional. An event without `capacity` defined or set to `null` means there is no limit on the number of attendees.
-        
-        
+
+
         The event `date` must be in the future.
       security:
         - UserToken: []
@@ -427,8 +427,8 @@ paths:
       summary: Change the status of an attendee of an event.
       description: >-
         Only the organizer of the event (as the currently authenticated user) can change the status of an attendee.
-        
-        
+
+
         `status` must be one of: "accepted", "pending", or "rejected".
       security:
         - UserToken: []

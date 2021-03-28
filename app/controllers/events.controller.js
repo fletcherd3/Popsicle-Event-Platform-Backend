@@ -42,7 +42,7 @@ exports.validateEventReq = (reqType) => {
     }
 };
 
-exports.getEvents = async function(req, res){
+exports.getEvents = async function (req, res) {
     try {
         // Get the query values
         let startIndex = req.query.startIndex;
@@ -58,13 +58,13 @@ exports.getEvents = async function(req, res){
             startIndex = 0;
         }
         // Check that the start index is a positive number
-        if(startIndex < 0 || isNaN(startIndex)){
+        if (startIndex < 0 || isNaN(startIndex)) {
             res.status(400).send('Bad Request');
             return;
         }
 
         // Check if the Category Ids are in the DB
-        if(categoryIds !== undefined){
+        if (categoryIds !== undefined) {
             let categoriesInDb = [];
             for (let i = 0; i < categoryIds.length; i++) {
                 if (await events.isCatergoryInDb(categoryIds[i])) {
@@ -72,15 +72,15 @@ exports.getEvents = async function(req, res){
                 }
             }
             categoryIds = categoriesInDb;
-            if(categoriesInDb.length === 0) {
+            if (categoriesInDb.length === 0) {
                 res.status(400).send('Bad Request');
                 return;
             }
         }
 
         // Check that the organizer Id is a positive number
-        if(organizerId !== undefined) {
-            if(organizerId < 0 || isNaN(organizerId)){
+        if (organizerId !== undefined) {
+            if (organizerId < 0 || isNaN(organizerId)) {
                 res.status(400).send('Bad Request');
                 return;
             }
@@ -88,22 +88,22 @@ exports.getEvents = async function(req, res){
 
         // Order by title
         let sortQuery;
-        if(sortBy === 'ALPHABETICAL_ASC'){
+        if (sortBy === 'ALPHABETICAL_ASC') {
             sortQuery = 'ORDER BY title ASC'
-        } else if (sortBy === 'ALPHABETICAL_DESC'){
+        } else if (sortBy === 'ALPHABETICAL_DESC') {
             sortQuery = 'ORDER BY title DESC'
-        // Order by capacity
-        } else if (sortBy === 'CAPACITY_ASC'){
+            // Order by capacity
+        } else if (sortBy === 'CAPACITY_ASC') {
             sortQuery = 'ORDER BY capacity ASC'
         } else if (sortBy === 'CAPACITY_DESC') {
             sortQuery = 'ORDER BY capacity DESC'
-        // Order by approved attendees
-        } else if (sortBy === 'ATTENDEES_ASC'){
+            // Order by approved attendees
+        } else if (sortBy === 'ATTENDEES_ASC') {
             sortQuery = 'ORDER BY numAcceptedAttendees ASC'
         } else if (sortBy === 'ATTENDEES_DESC') {
             sortQuery = 'ORDER BY numAcceptedAttendees DESC'
-        // Order by date
-        } else if (sortBy === 'DATE_ASC'){
+            // Order by date
+        } else if (sortBy === 'DATE_ASC') {
             sortQuery = 'ORDER BY date ASC'
         } else if (sortBy === 'DATE_DESC' || sortBy === undefined) {
             sortQuery = 'ORDER BY date DESC'
@@ -117,8 +117,8 @@ exports.getEvents = async function(req, res){
         eventResults = eventResults.splice(startIndex);
 
         // If a count is passed then only return at the most 'count' events
-        if (count !== undefined){
-            if(count < 0 || isNaN(count)){
+        if (count !== undefined) {
+            if (count < 0 || isNaN(count)) {
                 res.status(400).send('Bad Request');
                 return;
             }
@@ -133,12 +133,12 @@ exports.getEvents = async function(req, res){
     }
 };
 
-exports.addEvent = async function(req, res){
+exports.addEvent = async function (req, res) {
     try {
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
         const userId = await users.getUserIdByToken(userToken);
-        if(!userId){
+        if (!userId) {
             res.status(401).send('Unauthorized');
             return;
         }
@@ -173,7 +173,7 @@ exports.addEvent = async function(req, res){
             }
         }
         categoryIds = categoriesInDb;
-        if(categoryIds.length === 0) {
+        if (categoryIds.length === 0) {
             res.status(400).send('Bad Request');
             return;
         }
@@ -186,7 +186,7 @@ exports.addEvent = async function(req, res){
 
         // Register the valid event
         const newEventId = await events.addEvent(
-            title, description, categoryIds, date, isOnline, url, venue,capacity, requiresAttendanceControl, fee, userId);
+            title, description, categoryIds, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee, userId);
         res.status(201).send({"eventId": newEventId});
     } catch (err) {
         res.status(500).send('Internal Server Error');
@@ -194,13 +194,13 @@ exports.addEvent = async function(req, res){
     }
 };
 
-exports.getEvent = async function(req, res){
+exports.getEvent = async function (req, res) {
     try {
         const requestedId = req.params.id;
 
         // Check whether the event is in the Database, if not send 404
         const event = await events.getEvent(requestedId);
-        if (!event){
+        if (!event) {
             res.status(404).send("Not Found");
             return;
         }
@@ -212,7 +212,7 @@ exports.getEvent = async function(req, res){
     }
 };
 
-exports.updateEvent = async function(req, res){
+exports.updateEvent = async function (req, res) {
     try {
         // Validate request using validateEventReq
         const requestErrors = await validationResult(req);
@@ -225,7 +225,7 @@ exports.updateEvent = async function(req, res){
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
         const isValidToken = await users.isTokenInDb(userToken);
-        if(!isValidToken){
+        if (!isValidToken) {
             res.status(401).send('Unauthorized');
             return;
         }
@@ -233,7 +233,7 @@ exports.updateEvent = async function(req, res){
         // Check whether the event is in the Database, if not send 404
         const eventIdToEdit = req.params.id;
         const eventInDB = await events.isEventIDInDB(eventIdToEdit);
-        if (!eventInDB){
+        if (!eventInDB) {
             res.status(404).send("Not Found");
             return;
         }
@@ -280,12 +280,12 @@ exports.updateEvent = async function(req, res){
     }
 };
 
-exports.deleteEvent = async function(req, res){
+exports.deleteEvent = async function (req, res) {
     try {
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
         const isValidToken = await users.isTokenInDb(userToken);
-        if(!isValidToken){
+        if (!isValidToken) {
             res.status(401).send('Unauthorized');
             return;
         }
@@ -293,7 +293,7 @@ exports.deleteEvent = async function(req, res){
         // Check whether the event is in the Database, if not send 404
         const eventId = req.params.id;
         const eventInDB = await events.isEventIDInDB(eventId);
-        if (!eventInDB){
+        if (!eventInDB) {
             res.status(404).send("Not Found");
         }
 
@@ -316,7 +316,7 @@ exports.deleteEvent = async function(req, res){
     }
 };
 
-exports.getCategories = async function(req, res){
+exports.getCategories = async function (req, res) {
     try {
         const categories = await events.getCategories();
         res.status(200).send(categories);

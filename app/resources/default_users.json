@@ -1,22 +1,130 @@
 {
-  "properties": ["email", "first_name", "last_name", "image_filename", "password"],
+  "properties": [
+    "email",
+    "first_name",
+    "last_name",
+    "image_filename",
+    "password"
+  ],
   "usersData": [
-    ["k@gmail.com", "Kristy", "Lincoln", null, "abc123"],
-    ["a@gmail.com", "Amanda", "Faria", null, "abc234"],
-    ["B@gmail.com", "Fernando", "Brown", null, "abc345"],
-    ["jeh128@mail.nz", "Jack", "Chen", null, "abc456"],
-    ["lfg23@mail.nz", "Ella", "Yellow", null, "abc567"],
-    ["zhe25@mail.nz", "Henry", "Krippner", null, "abc678"],
-    ["ama541@mail.nz", "Finn", "Veale", null, "abc789"],
-    ["e.shellstrop@hotmail.com", "Eleanor" ,"Shellstrop", "user_1.jpg", "legitsnack"],
-    ["c.anagonye@stjohns.edu.au", "Chidi", "Anagonye", "user_2.png", "peepschili"],
-    ["tahani.aljamil@ox.ac.uk", "Tahani", "Al-Jamil", "user_3.gif", "outofthespotlight"],
-    ["boooooortles@hotmail.com", "Jason", "Mendoza", null, "boooortles"],
-    ["mindystclaire@gmail.com", "Mindy", "St. Claire", null, "password"],
-    ["s.garnett@stjohns.edu.au", "Simone", "Garnett", null, "nwkvcu33krjf"],
-    ["pillboi@ymail.com", "Steven", "Peleaz", null, "jacksonville"],
-    ["larryhemsworth@gmail.com", "Larry", "Hemsworth", null, "not_thor"],
-    ["kamilah.aljamil@ox.ac.uk", "Kamilah", "Al-Jamil", null, "ismrrhof"],
-    ["johnwheaton@gmail.com", "John", "Wheaton", null, "gossip"]
+    [
+      "k@gmail.com",
+      "Kristy",
+      "Lincoln",
+      "user_1.jpg",
+      "abc123"
+    ],
+    [
+      "a@gmail.com",
+      "Amanda",
+      "Faria",
+      "user_2.png",
+      "abc234"
+    ],
+    [
+      "B@gmail.com",
+      "Fernando",
+      "Brown",
+      "user_3.gif",
+      "abc345"
+    ],
+    [
+      "jeh128@mail.nz",
+      "Jack",
+      "Chen",
+      null,
+      "abc456"
+    ],
+    [
+      "lfg23@mail.nz",
+      "Ella",
+      "Yellow",
+      null,
+      "abc567"
+    ],
+    [
+      "zhe25@mail.nz",
+      "Henry",
+      "Krippner",
+      null,
+      "abc678"
+    ],
+    [
+      "ama541@mail.nz",
+      "Finn",
+      "Veale",
+      null,
+      "abc789"
+    ],
+    [
+      "e.shellstrop@hotmail.com",
+      "Eleanor",
+      "Shellstrop",
+      null,
+      "legitsnack"
+    ],
+    [
+      "c.anagonye@stjohns.edu.au",
+      "Chidi",
+      "Anagonye",
+      null,
+      "peepschili"
+    ],
+    [
+      "tahani.aljamil@ox.ac.uk",
+      "Tahani",
+      "Al-Jamil",
+      null,
+      "outofthespotlight"
+    ],
+    [
+      "boooooortles@hotmail.com",
+      "Jason",
+      "Mendoza",
+      null,
+      "boooortles"
+    ],
+    [
+      "mindystclaire@gmail.com",
+      "Mindy",
+      "St. Claire",
+      null,
+      "password"
+    ],
+    [
+      "s.garnett@stjohns.edu.au",
+      "Simone",
+      "Garnett",
+      null,
+      "nwkvcu33krjf"
+    ],
+    [
+      "pillboi@ymail.com",
+      "Steven",
+      "Peleaz",
+      null,
+      "jacksonville"
+    ],
+    [
+      "larryhemsworth@gmail.com",
+      "Larry",
+      "Hemsworth",
+      null,
+      "not_thor"
+    ],
+    [
+      "kamilah.aljamil@ox.ac.uk",
+      "Kamilah",
+      "Al-Jamil",
+      null,
+      "ismrrhof"
+    ],
+    [
+      "johnwheaton@gmail.com",
+      "John",
+      "Wheaton",
+      null,
+      "gossip"
+    ]
   ]
 }

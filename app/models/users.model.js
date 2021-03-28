@@ -2,7 +2,7 @@ const db = require('../../config/db');
 const passwords = require('./passwords');
 const bcrypt = require('bcrypt');
 
-exports.registerUser = async function(firstName, lastName, email, password) {
+exports.registerUser = async function (firstName, lastName, email, password) {
     // Hash Password
     password = await passwords.hash(password);
 
@@ -13,7 +13,7 @@ exports.registerUser = async function(firstName, lastName, email, password) {
     return rows.insertId;
 };
 
-exports.isLoginValid = async function(email, password) {
+exports.isLoginValid = async function (email, password) {
     const query = 'SELECT password FROM user where email = ?';
     const [rows] = await db.getPool().query(query, [email]);
 
@@ -26,61 +26,61 @@ exports.isLoginValid = async function(email, password) {
     return false;
 };
 
-exports.setUserToken = async function(userToken, email) {
+exports.setUserToken = async function (userToken, email) {
     const query = 'UPDATE user set auth_token = ? WHERE email = ?';
     await db.getPool().query(query, [userToken, email]);
 };
 
-exports.getUserIdByEmail = async function(email) {
+exports.getUserIdByEmail = async function (email) {
     const query = 'SELECT id FROM user WHERE email = ? ';
     const [rows] = await db.getPool().query(query, [email]);
     return rows[0].id;
 };
 
-exports.getUserIdByToken = async function(userToken){
+exports.getUserIdByToken = async function (userToken) {
     const query = 'SELECT id FROM user WHERE auth_token = ? ';
     const [rows] = await db.getPool().query(query, [userToken]);
 
     return rows[0] === undefined ? rows[0] : rows[0].id;
 };
 
-exports.isEmailInDb = async function(email) {
+exports.isEmailInDb = async function (email) {
     const query = 'SELECT id FROM user WHERE email = ? ';
     const [rows] = await db.getPool().query(query, [email]);
     return rows.length > 0;
 };
 
-exports.isTokenInDb = async function(userToken) {
+exports.isTokenInDb = async function (userToken) {
     const query = 'SELECT id FROM user WHERE auth_token = ? ';
     const [rows] = await db.getPool().query(query, [userToken]);
 
     return rows.length > 0;
 };
 
-exports.deleteToken = async function(userToken) {
+exports.deleteToken = async function (userToken) {
     const query = 'UPDATE user SET auth_token = null WHERE auth_token = ? ';
     await db.getPool().query(query, [userToken]);
 };
 
-exports.getAuthUser = async function(userId) {
+exports.getAuthUser = async function (userId) {
     const query = 'SELECT first_name, last_name, email FROM user WHERE id = ? ';
     const [rows] = await db.getPool().query(query, [userId]);
     return rows[0];
 };
 
-exports.getNonAuthUser = async function(userId) {
+exports.getNonAuthUser = async function (userId) {
     const query = 'SELECT first_name, last_name FROM user WHERE id = ? ';
     const [rows] = await db.getPool().query(query, [userId]);
     return rows[0];
 };
 
-exports.isUserInDb = async function(userId) {
+exports.isUserInDb = async function (userId) {
     const query = 'SELECT id FROM user WHERE id = ? ';
     const [rows] = await db.getPool().query(query, [userId]);
     return rows.length > 0;
 };
 
-exports.isCurrentPasswordValid = async function(userId, currentPassword) {
+exports.isCurrentPasswordValid = async function (userId, currentPassword) {
     const query = 'SELECT password FROM user WHERE id = ?';
     const [rows] = await db.getPool().query(query, [userId]);
 
@@ -93,7 +93,7 @@ exports.isCurrentPasswordValid = async function(userId, currentPassword) {
     return false;
 };
 
-exports.updateUser = async function(id, firstName, lastName, email, newPassword) {
+exports.updateUser = async function (id, firstName, lastName, email, newPassword) {
     let queryValues = [];
     let query = 'UPDATE user SET ';
 
@@ -116,7 +116,7 @@ exports.updateUser = async function(id, firstName, lastName, email, newPassword)
     }
     // Get rid of the last comma
     const lastComma = query.lastIndexOf(',');
-    query = query.slice(0, lastComma) + query.slice(lastComma+1);
+    query = query.slice(0, lastComma) + query.slice(lastComma + 1);
     query += " WHERE id = ?";
     queryValues.push(id);
 
