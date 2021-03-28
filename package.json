@@ -13,8 +13,6 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
-    "fecha": "^4.2.0",
-    "fetcha": "0.0.0",
     "humps": "^2.0.1",
     "mysql2": "^2.1.0",
     "mz": "^2.7.0"
