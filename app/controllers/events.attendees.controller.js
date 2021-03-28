@@ -1,0 +1,80 @@
+const events = require('../models/events.model');
+const users = require('../models/users.model');
+const eventAttendee = require('../models/events.attendees.model');
+
+
+exports.getEventAttendees = async function (req, res) {
+    let isMatchingUser;
+    try {
+        const eventId = req.params.id;
+
+        // Check whether the event is in the Database, if not send 404
+        const event = await events.getEvent(eventId);
+        if (!event) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        // Get users token from header and check if exists & active
+        const userToken = req.header('x-authorization');
+        const reqHasToken = !(userToken === "null");
+        const isValidToken = (reqHasToken && await users.isTokenInDb(userToken));
+
+        // Check whether requesting user is viewing their own event
+        let requestingId = -1; // Non-existing userId
+        if (isValidToken) {
+            requestingId = await users.getUserIdByToken(userToken);
+            isMatchingUser = requestingId === event.organizerId;
+        } else {
+            isMatchingUser = false;
+        }
+
+        let eventAttendees;
+        if (isMatchingUser) {
+            eventAttendees = await eventAttendee.getAuthdEventsAttendees(eventId);
+        } else {
+            eventAttendees = await eventAttendee.getNonAuthdEventsAttendees(eventId, requestingId);
+        }
+
+        res.status(200).send(eventAttendees);
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
+
+exports.requestAttendance = async function (req, res) {
+    try {
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const userId = await users.getUserIdByToken(userToken);
+        if (!userId) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the event is in the Database, if not send 404
+        const eventIdToJoin = req.params.id;
+        const eventInDB = await events.isEventIDInDB(eventIdToJoin);
+        if (!eventInDB) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        // Check if the User has already joined the event, if not send 403
+        const hasUserJoinedEvent = await eventAttendee.hasUserJoinedEvent(eventIdToJoin, userId);
+        const isEventInPast = await eventAttendee.isEventInPast(eventIdToJoin);
+        const isForbidden = hasUserJoinedEvent || isEventInPast;
+        if (isForbidden) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        await eventAttendee.requestAttendance(eventIdToJoin, userId);
+
+        res.status(201).send("Created");
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};

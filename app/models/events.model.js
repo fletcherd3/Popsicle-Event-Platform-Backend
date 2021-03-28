@@ -21,7 +21,7 @@ getEventsCategories = async function (eventId) {
 };
 
 getEventsAttendees = async function (eventId) {
-    query = 'SELECT count(*) AS numAcceptedAttendees FROM event_attendees WHERE event_id = ? AND attendance_status_id = 1;';
+    query = 'SELECT count(*) AS numAcceptedAttendees FROM event_attendees WHERE event_id = ? AND attendance_status_id = 1';
     const [result] = await db.getPool().query(query, [eventId]);
     return result[0].numAcceptedAttendees;
 };
