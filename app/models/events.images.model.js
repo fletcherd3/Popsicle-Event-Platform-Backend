@@ -1,3 +1,4 @@
+const db = require('../../config/db');
 const fs = require('fs');
 const imageLocation = './storage/images/';
 
@@ -16,12 +17,11 @@ exports.saveImage = async function (image, mimeType, eventId) {
         return 400;
     }
     const fileType = mimeType.split('/')[1];
-    const fileName = `event-${eventId}`;
+    const fileName = `event_${eventId}`;
 
-    // Check if their is an existing image for the event
+    // Get the filename if there is an existing image for the event
     const savedImages = await fs.readdirSync(imageLocation);
     const existingImage = savedImages.find((file) => {
-        // return the first files that include given entry
         return file.includes(fileName);
     });
 
@@ -34,6 +34,10 @@ exports.saveImage = async function (image, mimeType, eventId) {
             return 400;
         }
     });
+
+    // Save the filename in the database
+    const query = 'UPDATE event SET image_filename = ? WHERE id = ?';
+    await db.getPool().query(query, [`${fileName}.${fileType}`, eventId]);
 
     return existingImage ? 200 : 201;
 };
@@ -55,8 +59,7 @@ exports.getImage = async function (eventId) {
     // Check if their is an existing image for the event
     const savedImages = await fs.readdirSync(imageLocation);
     const fileName = savedImages.find((file) => {
-        // return the first files that include given entry
-        return file.includes(`event-${eventId}`);
+        return file.includes(`event_${eventId}`);
     });
     if (!fileName) {
         return [null, null];
@@ -66,6 +69,7 @@ exports.getImage = async function (eventId) {
     const mimeDict = {
         png: 'image/png',
         jpeg: 'image/jpeg',
+        jpg: 'image/jpeg',
         gif: 'image/gif'
     };
 

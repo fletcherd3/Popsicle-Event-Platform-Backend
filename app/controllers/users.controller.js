@@ -11,7 +11,7 @@ exports.validateUserReq = (reqType) => {
                     'firstName',
                     'lastName',
                     'password'
-                ]).isLength({min: 1})
+                ]).isLength({ min: 1 })
             ]
         }
         case 'update': {
@@ -22,14 +22,14 @@ exports.validateUserReq = (reqType) => {
                     'lastName',
                     'currentPassword',
                     'password'
-                ]).optional().isLength({min: 1})
+                ]).optional().isLength({ min: 1 })
             ]
         }
     }
 
 };
 
-exports.registerUser = async function (req, res) {
+exports.registerUser = async function(req, res){
     try {
         // Validate request using validateUserReq
         const requestErrors = await validationResult(req);
@@ -59,7 +59,7 @@ exports.registerUser = async function (req, res) {
     }
 };
 
-exports.loginUser = async function (req, res) {
+exports.loginUser = async function(req, res){
     try {
         const email = req.body.email;
         const password = req.body.password;
@@ -78,36 +78,36 @@ exports.loginUser = async function (req, res) {
 
         res.status(200).send({"userId": userId, "token": userToken})
     } catch (err) {
-        res.status(500).send('Internal Server Error');
+        res.status(500).send( 'Internal Server Error');
     }
 };
 
 exports.logoutUser = async function (req, res) {
-    try {
+    try{
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
         const isValidToken = await users.isTokenInDb(userToken);
 
-        if (!isValidToken) {
+        if(!isValidToken){
             res.status(401).send('Unauthorized');
             return;
         }
 
         await users.deleteToken(userToken);
         res.status(200).send('OK')
-    } catch (err) {
+    } catch (err){
         res.status(500).send('Internal Server Error');
     }
 };
 
 exports.getUser = async function (req, res) {
-    try {
+    try{
         const requestedId = req.params.id;
         let usersData, isMatchingUser;
 
         // Check whether the user is in the Database, if not send 404
         const userInDB = await users.isUserInDb(requestedId);
-        if (!userInDB) {
+        if (!userInDB){
             res.status(404).send("Not Found");
             return;
         }
@@ -126,7 +126,7 @@ exports.getUser = async function (req, res) {
         }
 
         // Gather user data depending on whether user is viewing own details
-        if (isMatchingUser) {
+        if(isMatchingUser){
             const authUser = await users.getAuthUser(requestedId);
             usersData = {
                 "firstName": authUser.first_name,
@@ -142,13 +142,13 @@ exports.getUser = async function (req, res) {
         }
 
         res.status(200).send(usersData);
-    } catch (err) {
+    } catch (err){
         res.status(500).send('Internal Server Error');
     }
 };
 
 exports.updateUser = async function (req, res) {
-    try {
+    try{
         // Validate request using validateUserReq
         const requestErrors = await validationResult(req);
         if (!requestErrors.isEmpty()) {
@@ -160,7 +160,7 @@ exports.updateUser = async function (req, res) {
         // Get users token from header and check if active, if not send 401
         const userToken = req.header('x-authorization');
         const isValidToken = await users.isTokenInDb(userToken);
-        if (!isValidToken) {
+        if(!isValidToken){
             res.status(401).send('Unauthorized');
             return;
         }
@@ -168,7 +168,7 @@ exports.updateUser = async function (req, res) {
         // Check whether the user is in the Database, if not send 404
         const userIdToEdit = req.params.id;
         const userInDB = await users.isUserInDb(userIdToEdit);
-        if (!userInDB) {
+        if (!userInDB){
             res.status(404).send("Not Found");
             return;
         }
@@ -206,7 +206,7 @@ exports.updateUser = async function (req, res) {
 
         await users.updateUser(requestingId, firstName, lastName, email, newPassword);
         res.status(200).send('OK')
-    } catch (err) {
+    } catch (err){
         res.status(500).send('Internal Server Error');
     }
 };

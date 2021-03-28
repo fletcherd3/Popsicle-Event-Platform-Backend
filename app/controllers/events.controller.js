@@ -156,13 +156,17 @@ exports.addEvent = async function (req, res) {
         let categoryIds = req.body.categoryIds;
         categoryIds = Array.isArray(categoryIds) ? categoryIds : [categoryIds];
         const date = req.body.date;
-        const isOnline = req.body.isOnline;
+        let isOnline = req.body.isOnline;
+        isOnline = isOnline === undefined ? 0 : isOnline;  // If undefined set to default value
         const url = req.body.url;
         const venue = req.body.venue;
         let capacity = req.body.capacity;
         capacity = capacity === undefined ? null : capacity;
-        const requiresAttendanceControl = req.body.requiresAttendanceControl;
-        const fee = req.body.fee;
+        let requiresAttendanceControl = req.body.requiresAttendanceControl;
+        requiresAttendanceControl =
+            requiresAttendanceControl === undefined ? 0 : requiresAttendanceControl;
+        let fee = req.body.fee;
+        fee = fee === undefined ? 0.00 : fee;  // If undefined set to default value
 
 
         // Check if the Category Ids are in the DB

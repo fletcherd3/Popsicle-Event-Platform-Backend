@@ -64,7 +64,6 @@ exports.getEvents = async function (queryTerm, categoryIds, organizerId, sortQue
 
 exports.addEvent = async function (
     title, description, categoryIds, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee, userId) {
-    // TODO: Add catagories!
     // TODO: Add organiser as attendee?
     let query = 'INSERT INTO event ' +
         '(title, description, date, is_online, url, venue, capacity, requires_attendance_control, fee, organizer_id) ' +

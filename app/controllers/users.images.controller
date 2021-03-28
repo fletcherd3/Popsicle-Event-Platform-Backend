@@ -1,6 +1,4 @@
 const users = require('../models/users.model');
-const events = require('../models/events.model');
-const eventImage = require('../models/events.images.model');
 const userImage = require('../models/users.images.model');
 
 exports.setUserImage = async function (req, res) {
@@ -50,26 +48,59 @@ exports.setUserImage = async function (req, res) {
     }
 };
 
-// exports.getEventImage = async function (req, res) {
-//     try {
-//         const eventId = req.params.id;
-//
-//         // Check whether the event is in the Database, if not send 404
-//         const event = await events.getEvent(eventId);
-//         if (!event) {
-//             res.status(404).send("Not Found");
-//             return;
-//         }
-//
-//         const [image, mimeType] = await eventImage.getImage(eventId);
-//         if (!image) {
-//             res.status(404).send("Not Found");
-//             return;
-//         }
-//         res.contentType(mimeType);
-//         res.status(200).send(image);
-//
-//     } catch (err) {
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
+exports.getUserImage = async function (req, res) {
+    try {
+        const userId = req.params.id;
+
+        // Check whether the user is in the Database, if not send 404
+        const userInDB = await users.isUserInDb(userId);
+        if (!userInDB) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        const [image, mimeType] = await userImage.getImage(userId);
+        if (!image) {
+            res.status(404).send("Not Found");
+            return;
+        }
+        res.contentType(mimeType);
+        res.status(200).send(image);
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+exports.deleteUserImage = async function (req, res) {
+    try {
+        const userIdToDelete = req.params.id;
+
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const isValidToken = await users.isTokenInDb(userToken);
+        if (!isValidToken) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the user is in the Database, if not send 404
+        const userInDB = await users.isUserInDb(userIdToDelete);
+        if (!userInDB) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        // Check if the requesting User is deleting their own image, if not send 403
+        const requestingId = await users.getUserIdByToken(userToken);
+        const isMatchingUser = requestingId == userIdToDelete;
+        if (!isMatchingUser) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        await userImage.removeImage(userIdToDelete);
+        res.status(200).send("OK");
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+    }
+};
