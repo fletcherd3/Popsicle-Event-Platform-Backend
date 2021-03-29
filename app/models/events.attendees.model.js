@@ -66,8 +66,8 @@ exports.updateAttendance = async function (userId, eventId, status) {
 };
 
 exports.isUserAttendingEvent = async function (userId, eventId) {
-    const query = `UPDATE event_attendees
-                   SET attendance_status_id = ?
+    const query = `SELECT * FROM event_attendees
                    WHERE user_id = ? AND event_id = ?`;
-    await db.getPool().query(query, [status, userId, eventId]);
+    const [result] = await db.getPool().query(query, [userId, eventId]);
+    return result.length > 0;
 };

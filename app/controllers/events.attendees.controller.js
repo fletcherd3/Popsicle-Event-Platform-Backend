@@ -117,17 +117,19 @@ exports.removeAttendance = async function (req, res) {
 };
 
 exports.updateAttendance = async function (req, res) {
+    const eventId = req.params.event_id;
+    const userId = req.params.user_id;
+    const userToken = req.header('x-authorization');
     try {
         // Get users token from header and check if active, if not send 401
-        const requestingId = req.header('x-authorization');
-        const userId = await users.getUserIdByToken(userToken);
-        if (!userId) {
+        const requestingId = await users.getUserIdByToken(userToken);
+        if (!requestingId) {
             res.status(401).send('Unauthorized');
             return;
         }
 
         // Check if the requesting User is editing their own event attendance, if not send 403
-        const organiserId = await events.getOrganiserId(eventIdToEdit);
+        const organiserId = await events.getOrganiserId(eventId);
         const isEventsOrganiser = requestingId == organiserId;
         if (!isEventsOrganiser) {
             res.status(403).send('Forbidden');
@@ -135,8 +137,7 @@ exports.updateAttendance = async function (req, res) {
         }
 
         // Check whether the event/user is in the Database, if not send 404
-        const eventIdToEdit = req.params.id;
-        const isUserAttendingEvent = await eventAttendee.isUserAttendingEvent(userId, eventIdToEdit);
+        const isUserAttendingEvent = await eventAttendee.isUserAttendingEvent(requestingId, eventId);
         if (!isUserAttendingEvent) {
             res.status(404).send("Not Found");
             return;
@@ -147,14 +148,14 @@ exports.updateAttendance = async function (req, res) {
             'accepted': 1,
             'pending': 2,
             'rejected': 3
-        }
+        };
         const statusValue = validStatus[req.body.status];
         if (!statusValue) {
             res.status(400).send("Bad Request");
             return;
         }
 
-        await eventAttendee.updateAttendance(userId, eventIdToEdit, statusValue);
+        await eventAttendee.updateAttendance(userId, eventId, statusValue);
 
         res.status(200).send("OK");
     } catch (err) {
