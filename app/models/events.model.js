@@ -64,7 +64,6 @@ exports.getEvents = async function (queryTerm, categoryIds, organizerId, sortQue
 
 exports.addEvent = async function (
     title, description, categoryIds, date, isOnline, url, venue, capacity, requiresAttendanceControl, fee, userId) {
-    // TODO: Add organiser as attendee?
     let query = 'INSERT INTO event ' +
         '(title, description, date, is_online, url, venue, capacity, requires_attendance_control, fee, organizer_id) ' +
         'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
@@ -121,7 +120,6 @@ exports.getEvent = async function (eventId) {
         return undefined;
     }
 
-    // TODO clean this up with duplicate code from above
     // Get the categories for the event and format them into an array
     query = 'SELECT category_id FROM event_category WHERE event_id = ?';
     let [categoriesResult] = await db.getPool().query(query, [event.eventId]);
