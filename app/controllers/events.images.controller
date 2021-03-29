@@ -1,6 +1,6 @@
 const users = require('../models/users.model');
 const events = require('../models/events.model');
-const eventImage = require('../models/events.images.model')
+const eventImage = require('../models/events.images.model');
 
 exports.setEventImage = async function (req, res) {
     try {

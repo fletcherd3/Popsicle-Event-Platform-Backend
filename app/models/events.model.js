@@ -28,10 +28,14 @@ getEventsAttendees = async function (eventId) {
 
 exports.getEvents = async function (queryTerm, categoryIds, organizerId, sortQuery) {
     let queryValues = [];
-    let query = `SELECT E.id AS eventId, E.title, U.first_name AS organizerFirstName, U.last_name AS organizerLastName, E.capacity
-                FROM event E   
-                JOIN user U ON E.organizer_id = U.id
-                JOIN event_category C ON E.id = C.event_id`;
+    let query = `SELECT E.id         AS eventId,
+                        E.title,
+                        U.first_name AS organizerFirstName,
+                        U.last_name  AS organizerLastName,
+                        E.capacity
+                 FROM event E
+                          JOIN user U ON E.organizer_id = U.id
+                          JOIN event_category C ON E.id = C.event_id`;
 
     if (queryTerm !== undefined) {
         query += ` AND (E.title LIKE ? OR E.description LIKE ?)`;
@@ -104,13 +108,25 @@ exports.getOrganiserId = async function (eventId) {
 };
 
 exports.getEvent = async function (eventId) {
-    let query = `SELECT E.id AS eventId, title, first_name AS organizerFirstName, last_name AS organizerLastName,
-        count(A.id) AS numAcceptedAttendees, capacity, description, organizer_id AS organizerId, date,
-        is_online AS isOnline, url, venue, requires_attendance_control AS requiresAttendanceControl, fee
-        FROM event E
-        JOIN user U ON E.organizer_id = U.id
-        JOIN event_attendees A ON A.event_id = E.id
-        WHERE attendance_status_id = 1 AND E.id = ?`;
+    let query = `SELECT E.id                        AS eventId,
+                        title,
+                        first_name                  AS organizerFirstName,
+                        last_name                   AS organizerLastName,
+                        count(A.id)                 AS numAcceptedAttendees,
+                        capacity,
+                        description,
+                        organizer_id                AS organizerId,
+                        date,
+                        is_online                   AS isOnline,
+                        url,
+                        venue,
+                        requires_attendance_control AS requiresAttendanceControl,
+                        fee
+                 FROM event E
+                          JOIN user U ON E.organizer_id = U.id
+                          JOIN event_attendees A ON A.event_id = E.id
+                 WHERE attendance_status_id = 1
+                   AND E.id = ?`;
 
     let [event] = await db.getPool().query(query, [eventId]);
     event = event[0];
@@ -139,7 +155,7 @@ exports.updateEventsCategories = async function (eventId, categories) {
     let query = 'DELETE FROM event_category WHERE event_id = ?';
     await db.getPool().query(query, [eventId]);
 
-    query = 'INSERT INTO event_category (event_id, category_id) VALUES (?, ?)'
+    query = 'INSERT INTO event_category (event_id, category_id) VALUES (?, ?)';
     for (var i = 0; i < categories.length; i++) {
         await db.getPool().query(query, [eventId, categories[i]]);
     }
@@ -199,12 +215,16 @@ exports.updateEvent = async function (eventId, event) {
 };
 
 exports.deleteEventsCatergories = async function (eventId) {
-    const query = `DELETE FROM event_category WHERE event_id = ?`;
+    const query = `DELETE
+                   FROM event_category
+                   WHERE event_id = ?`;
     await db.getPool().query(query, [eventId]);
 };
 
 exports.deleteEvent = async function (eventId) {
-    const query = `DELETE FROM event WHERE id = ?`;
+    const query = `DELETE
+                   FROM event
+                   WHERE id = ?`;
     await db.getPool().query(query, [eventId]);
 };
 
