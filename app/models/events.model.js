@@ -8,7 +8,7 @@ exports.isCatergoryInDb = async function (categoryId) {
 
 getEventsCategories = async function (eventId) {
     // Get the categories for each event and format them into an array
-    query = 'SELECT category_id FROM event_category WHERE event_id = ?';
+    const query = 'SELECT category_id FROM event_category WHERE event_id = ?';
 
     let categoriesResult = await db.getPool().query(query, [eventId]);
     categoriesResult = categoriesResult[0];
@@ -21,7 +21,7 @@ getEventsCategories = async function (eventId) {
 };
 
 getEventsAttendees = async function (eventId) {
-    query = 'SELECT count(*) AS numAcceptedAttendees FROM event_attendees WHERE event_id = ? AND attendance_status_id = 1';
+    const query = 'SELECT count(*) AS numAcceptedAttendees FROM event_attendees WHERE event_id = ? AND attendance_status_id = 1';
     const [result] = await db.getPool().query(query, [eventId]);
     return result[0].numAcceptedAttendees;
 };

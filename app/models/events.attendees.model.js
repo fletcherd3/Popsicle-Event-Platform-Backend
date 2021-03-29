@@ -1,9 +1,8 @@
 const db = require('../../config/db');
-const fecha = require('fecha');
 
 
 exports.getAuthdEventsAttendees = async function (eventId) {
-    query = `SELECT A.user_id AS attendeeId, S.name AS status, U.first_name AS firstName, U.last_name AS lastName, A.date_of_interest AS dateOfInterest
+    const query = `SELECT A.user_id AS attendeeId, S.name AS status, U.first_name AS firstName, U.last_name AS lastName, A.date_of_interest AS dateOfInterest
              FROM event_attendees A
              JOIN attendance_status S ON A.attendance_status_id = S.id
              JOIN user U ON A.user_id = U.id
@@ -13,7 +12,7 @@ exports.getAuthdEventsAttendees = async function (eventId) {
 };
 
 exports.getNonAuthdEventsAttendees = async function (eventId, userId) {
-    query = `SELECT A.user_id AS attendeeId, S.name AS status, U.first_name AS firstName, U.last_name AS lastName, A.date_of_interest AS dateOfInterest
+    const query = `SELECT A.user_id AS attendeeId, S.name AS status, U.first_name AS firstName, U.last_name AS lastName, A.date_of_interest AS dateOfInterest
              FROM event_attendees A
              JOIN attendance_status S ON A.attendance_status_id = S.id
              JOIN user U ON A.user_id = U.id
@@ -24,13 +23,13 @@ exports.getNonAuthdEventsAttendees = async function (eventId, userId) {
 };
 
 exports.hasUserJoinedEvent = async function (eventId, userId) {
-    query = `SELECT * FROM event_attendees WHERE event_id = ? AND user_id = ?`;
+    const query = `SELECT * FROM event_attendees WHERE event_id = ? AND user_id = ?`;
     const [result] = await db.getPool().query(query, [eventId, userId]);
     return result.length > 0;
 };
 
 exports.isEventInPast = async function (eventId) {
-    query = `SELECT date FROM event WHERE id = ?`;
+    const query = `SELECT date FROM event WHERE id = ?`;
     const [result] = await db.getPool().query(query, [eventId]);
     const eventsDate = new Date(result[0].date);
 
@@ -39,7 +38,36 @@ exports.isEventInPast = async function (eventId) {
 
 exports.requestAttendance = async function (eventId, userId) {
     const pendingId = 2;
-    query = `INSERT INTO event_attendees (event_id, user_id, attendance_status_id, date_of_interest)
+    const query = `INSERT INTO event_attendees (event_id, user_id, attendance_status_id, date_of_interest)
              VALUES (?, ?, ?, SYSDATE())`;
     await db.getPool().query(query, [eventId, userId, pendingId]);
+};
+
+exports.isUserIsRejected = async function (eventId, userId) {
+    const rejectedId = 3;
+    const query = `SELECT id
+             FROM event_attendees
+             WHERE user_id = ? AND event_id = ? AND attendance_status_id = ?`;
+    const [result] = await db.getPool().query(query, [userId, eventId, rejectedId]);
+    return result.length > 0;
+};
+
+exports.removeAttendance = async function (eventId, userId) {
+    const query = `DELETE FROM event_attendees
+             WHERE user_id = ? AND event_id = ?`;
+    await db.getPool().query(query, [userId, eventId]);
+};
+
+exports.updateAttendance = async function (userId, eventId, status) {
+    const query = `UPDATE event_attendees
+                   SET attendance_status_id = ?
+                   WHERE user_id = ? AND event_id = ?`;
+    await db.getPool().query(query, [status, userId, eventId]);
+};
+
+exports.isUserAttendingEvent = async function (userId, eventId) {
+    const query = `UPDATE event_attendees
+                   SET attendance_status_id = ?
+                   WHERE user_id = ? AND event_id = ?`;
+    await db.getPool().query(query, [status, userId, eventId]);
 };

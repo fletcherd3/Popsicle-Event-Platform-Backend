@@ -78,3 +78,87 @@ exports.requestAttendance = async function (req, res) {
         console.log(err);
     }
 };
+
+exports.removeAttendance = async function (req, res) {
+    try {
+        // Get users token from header and check if active, if not send 401
+        const userToken = req.header('x-authorization');
+        const userId = await users.getUserIdByToken(userToken);
+        if (!userId) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check whether the event is in the Database, if not send 404
+        const eventIdToLeave = req.params.id;
+        const eventInDB = await events.isEventIDInDB(eventIdToLeave);
+        if (!eventInDB) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        // Check if the User has already joined the event, if not send 403
+        const hasUserJoinedEvent = await eventAttendee.hasUserJoinedEvent(eventIdToLeave, userId);
+        const isEventInPast = await eventAttendee.isEventInPast(eventIdToLeave);
+        const isUserIsRejected = await eventAttendee.isUserIsRejected(eventIdToLeave, userId);
+        const isForbidden = !hasUserJoinedEvent || isEventInPast || isUserIsRejected;
+        if (isForbidden) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        await eventAttendee.removeAttendance(eventIdToLeave, userId);
+
+        res.status(200).send("OK");
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
+
+exports.updateAttendance = async function (req, res) {
+    try {
+        // Get users token from header and check if active, if not send 401
+        const requestingId = req.header('x-authorization');
+        const userId = await users.getUserIdByToken(userToken);
+        if (!userId) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        // Check if the requesting User is editing their own event attendance, if not send 403
+        const organiserId = await events.getOrganiserId(eventIdToEdit);
+        const isEventsOrganiser = requestingId == organiserId;
+        if (!isEventsOrganiser) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+
+        // Check whether the event/user is in the Database, if not send 404
+        const eventIdToEdit = req.params.id;
+        const isUserAttendingEvent = await eventAttendee.isUserAttendingEvent(userId, eventIdToEdit);
+        if (!isUserAttendingEvent) {
+            res.status(404).send("Not Found");
+            return;
+        }
+
+        // Check if the body contains a valid content
+        const validStatus = {
+            'accepted': 1,
+            'pending': 2,
+            'rejected': 3
+        }
+        const statusValue = validStatus[req.body.status];
+        if (!statusValue) {
+            res.status(400).send("Bad Request");
+            return;
+        }
+
+        await eventAttendee.updateAttendance(userId, eventIdToEdit, statusValue);
+
+        res.status(200).send("OK");
+    } catch (err) {
+        res.status(500).send('Internal Server Error');
+        console.log(err);
+    }
+};
