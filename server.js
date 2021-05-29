@@ -3,7 +3,7 @@ const db = require('./config/db');
 const express = require('./config/express');
 
 const app = express();
-const port = process.env.SENG365_PORT || 4941;
+const port = process.env.PORT || 4941;
 
 // Test connection to MySQL on start-up
 async function testDbConnection() {
