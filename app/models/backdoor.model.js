@@ -34,6 +34,12 @@ exports.loadData = async function () {
     return Promise.all(promises);
 };
 
+exports.loadImages = async function () {
+    const defaultImages = await fs.readdir(defaultImageDirectory);
+    const promises = defaultImages.map(file => fs.copyFile(defaultImageDirectory + file, imageDirectory + file));
+    return Promise.all(promises);
+};
+
 /**
  * Populates the user table in the database with the given data. Must be done here instead of within the
  * `resample_database.sql` script because passwords must be hashed according to the particular implementation.

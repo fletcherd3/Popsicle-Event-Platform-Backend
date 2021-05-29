@@ -1,6 +1,7 @@
 require('dotenv').config();
 const db = require('./config/db');
 const express = require('./config/express');
+const Backdoor = require('./app/models/backdoor.model');
 
 const app = express();
 const port = process.env.PORT || 4941;
@@ -15,6 +16,9 @@ async function testDbConnection() {
         process.exit(1);
     }
 }
+
+// Move the images from the default dir
+Backdoor.loadImages();
 
 testDbConnection()
     .then(function () {
